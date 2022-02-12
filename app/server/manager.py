@@ -66,6 +66,7 @@ class TelegramBot(TelegramAPI):
                 update_id = str(msg['update_id'])
                 from_id = str(msg['message']['from']['id'])
                 chat_id = str(msg['message']['chat']['id'])
+                print(chat_id)
                 date = int(msg['message']['date'])
                 if date < self.boot_time: break
                 text = str(msg['message']['text'])
@@ -83,10 +84,10 @@ class TelegramBot(TelegramAPI):
                     if ':' in text:
                         func = getattr(self, text.split(':')[0].replace('/', ''))
                         arg = tuple(text.split(':')[-1].split(','))
-                        res = func(chat_id, arg)
+                        res = func(arg)
                     else:
                         func = getattr(self, text.replace('/', ''))
-                        res = func(chat_id)
+                        res = func()
                     self.send_message(res, chat_id)
                 except Exception as e:
                     self.send_message(e, chat_id)
