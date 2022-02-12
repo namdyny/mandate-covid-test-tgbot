@@ -11,7 +11,7 @@ from datetime import datetime
 from api.restful.restful_telegram import *
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
-print(this_folder)
+print(this_folder, 'bot started')
 
 class TelegramBot(TelegramAPI):
     def __init__(self,
@@ -66,7 +66,6 @@ class TelegramBot(TelegramAPI):
                 update_id = str(msg['update_id'])
                 from_id = str(msg['message']['from']['id'])
                 chat_id = str(msg['message']['chat']['id'])
-                print(chat_id)
                 date = int(msg['message']['date'])
                 if date < self.boot_time: break
                 text = str(msg['message']['text'])
@@ -140,7 +139,6 @@ class TelegramBot(TelegramAPI):
         return res
 
     def covidinfo(self, arg):
-        print(arg[0])
         res = self.get_covid_info(arg[0])
         return res
 
