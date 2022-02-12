@@ -22,7 +22,7 @@ class TelegramAPI:
         if chat_id == None:
             chat_id = self.chat_id
         params = {
-            'chat_id': self.chat_id,
+            'chat_id': chat_id,
             'text': text
         }
         res = get(f'{self.base_url}sendMessage', params=params)
