@@ -78,7 +78,6 @@ class TelegramBot(TelegramAPI):
                     'from_id': from_id,
                     'date': date,
                 })
-                print(update_id)
                 try:
                     text = text.replace('@lilony_bot', '')
                     if ':' in text:
