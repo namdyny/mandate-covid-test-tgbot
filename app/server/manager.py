@@ -1,13 +1,14 @@
 
+import sqlite3
+import os
 from time import sleep
-from api.restful.restful_telegram import *
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from server.model import *
-import sqlite3
-import os
 from requests import get
 from urllib.parse import urlencode
+from datetime import datetime
+from api.restful.restful_telegram import *
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
 print(this_folder)
@@ -15,15 +16,16 @@ print(this_folder)
 class TelegramBot(TelegramAPI):
     def __init__(self,
         botid: str = '5150682044:AAHOOBOS28DVmiJmeHkS_nRVGEPI1gp674I',
-        chatid: str = '-748063135',
+        chat_id: str = '-748063135',
         update_limit: int = 10
     ) -> None:
-        super().__init__(botid, chatid, update_limit)
+        super().__init__(botid, chat_id, update_limit)
         self.db_path = f'{this_folder}/sqlite/sqlite.db'
         self.db_engine = create_engine(f'sqlite:///{self.db_path}')
         Session = sessionmaker(bind=self.db_engine)
         self.session = Session()
         Base.metadata.create_all(self.db_engine)
+        self.boot_time = int(datetime.now().timestamp())
 
 
     def init_db(self):
@@ -65,8 +67,8 @@ class TelegramBot(TelegramAPI):
                 from_id = str(msg['message']['from']['id'])
                 chat_id = str(msg['message']['chat']['id'])
                 date = int(msg['message']['date'])
+                if date < self.boot_time: break
                 text = str(msg['message']['text'])
-                if chat_id != self.chatid: break
                 if not text.startswith('/'): break
                 is_exist = self.find_record(update_id)
                 if is_exist: break
@@ -81,13 +83,13 @@ class TelegramBot(TelegramAPI):
                     if ':' in text:
                         func = getattr(self, text.split(':')[0].replace('/', ''))
                         arg = tuple(text.split(':')[-1].split(','))
-                        res = func(arg)
+                        res = func(chat_id, arg)
                     else:
                         func = getattr(self, text.replace('/', ''))
-                        res = func()
-                    self.send_message(res)
+                        res = func(chat_id)
+                    self.send_message(res, chat_id)
                 except Exception as e:
-                    self.send_message(e)
+                    self.send_message(e, chat_id)
             sleep(0.5)
 
     def get_covid_info(self, premise):
@@ -121,7 +123,6 @@ class TelegramBot(TelegramAPI):
         }
         res = get(f'{url}{urlencode(params)}').json()
         res = res['features'][-1]['attributes']
-        print(res)
         f_text = f'''🏠: {res['SpecifiedPremises_EN']}
 💥: {res['Status_Cal']}
 📆: {res['Period_EN']}
@@ -142,3 +143,6 @@ class TelegramBot(TelegramAPI):
         print(arg[0])
         res = self.get_covid_info(arg[0])
         return res
+
+    def healthcheck(self):
+        return 'Lilony_bot: ONLINE'
