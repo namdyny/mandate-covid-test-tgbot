@@ -23,6 +23,11 @@ class TelegramBot(TelegramAPI):
     ) -> None:
         super().__init__(botid, chat_id, update_limit)
         self.db_path = f'{this_folder}/sqlite/sqlite.db'
+        try:
+            os.remove(self.db_path)
+        except: pass
+        sleep(0.5)
+        self.init_db(); sleep(0.5)
         self.db_engine = create_engine(f'sqlite:///{self.db_path}')
         Session = sessionmaker(bind=self.db_engine)
         self.session = Session()
