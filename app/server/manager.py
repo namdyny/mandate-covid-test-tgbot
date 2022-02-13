@@ -67,37 +67,40 @@ class TelegramBot(TelegramAPI):
 
     def thread_update_worker(self):
         while True:
-            res = self.get_updates()
-            res_list = res['result'][::-1]
-            for msg in res_list:
-                update_id = str(msg['update_id'])
-                from_id = str(msg['message']['from']['id'])
-                chat_id = str(msg['message']['chat']['id'])
-                date = int(msg['message']['date'])
-                if date < self.boot_time: break
-                text = str(msg['message']['text'])
-                if not text.startswith('/'): break
-                is_exist = self.find_record(update_id)
-                if is_exist: break
-                self.insert_record({
-                    'update_id': update_id,
-                    'from_id': from_id,
-                    'date': date,
-                })
-                print(date, from_id, text)
-                try:
-                    text = text.replace('@lilony_bot', '')
-                    if ':' in text:
-                        func = getattr(self, text.split(':')[0].replace('/', ''))
-                        arg = tuple(text.split(':')[-1].split(','))
-                        res = func(arg)
-                    else:
-                        func = getattr(self, text.replace('/', ''))
-                        res = func()
-                    for i in res:
-                        self.send_message(res, chat_id)
-                except Exception as e:
-                    self.send_message(e, chat_id)
+            try:
+                res = self.get_updates()
+                res_list = res['result'][::-1]
+                for msg in res_list:
+                    update_id = str(msg['update_id'])
+                    from_id = str(msg['message']['from']['id'])
+                    chat_id = str(msg['message']['chat']['id'])
+                    date = int(msg['message']['date'])
+                    if date < self.boot_time: break
+                    text = str(msg['message']['text'])
+                    if not text.startswith('/'): break
+                    is_exist = self.find_record(update_id)
+                    if is_exist: break
+                    self.insert_record({
+                        'update_id': update_id,
+                        'from_id': from_id,
+                        'date': date,
+                    })
+                    print(date, from_id, text)
+                    try:
+                        text = text.replace('@lilony_bot', '')
+                        if ':' in text:
+                            func = getattr(self, text.split(':')[0].replace('/', ''))
+                            arg = tuple(text.split(':')[-1].split(','))
+                            res = func(arg)
+                        else:
+                            func = getattr(self, text.replace('/', ''))
+                            res = func()
+                        for i in res:
+                            self.send_message(res, chat_id)
+                    except Exception as e:
+                        self.send_message(e, chat_id)
+            except Exception as e:
+                print(e)
             sleep(0.5)
 
     def get_covid_info(self, premise) -> list:
