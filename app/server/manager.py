@@ -8,7 +8,9 @@ from server.model import *
 from requests import get
 from urllib.parse import urlencode
 from datetime import datetime
+from pprint import pprint
 from api.restful.restful_telegram import *
+
 
 this_folder = os.path.dirname(os.path.abspath(__file__))
 print(this_folder, 'bot started')
@@ -86,12 +88,13 @@ class TelegramBot(TelegramAPI):
                     else:
                         func = getattr(self, text.replace('/', ''))
                         res = func()
-                    self.send_message(res, chat_id)
+                    for i in res:
+                        self.send_message(res, chat_id)
                 except Exception as e:
                     self.send_message(e, chat_id)
             sleep(0.5)
 
-    def get_covid_info(self, premise):
+    def get_covid_info(self, premise) -> list:
         url = f'https://services8.arcgis.com/PXQv9PaDJHzt8rp0/ArcGIS/rest/services/CompulsoryTestingBuilding_View2/FeatureServer/0/query?'
         params = {
             'where': f"SpecifiedPremises_ZH LIKE '%{premise}%' AND Status = 'Active'",
@@ -121,24 +124,28 @@ class TelegramBot(TelegramAPI):
             'token': ''
         }
         res = get(f'{url}{urlencode(params)}').json()
-        res = res['features'][-1]['attributes']
-        f_text = f'''🏠: {res['SpecifiedPremises_EN']}
-💥: {res['Status_Cal']}
-📆: {res['Period_EN']}
-🔔: {res['Deadline_EN']}
-📻: {res['URL_ZH_CAL'].split('"')[1]}
-        '''
-        return f_text
+        pprint(res)
+        f_text_list = []
+        for feature in res['features']:
+            attributes = feature['attributes']
+            f_text = f'''🏠: {attributes['SpecifiedPremises_EN']}
+💥: {attributes['Status_Cal']}
+📆: {attributes['Period_EN']}
+🔔: {attributes['Deadline_EN']}
+📻: {attributes['URL_ZH_CAL'].split('"')[1]}
+            '''
+            f_text_list.append(f_text)
+        return f_text_list
 
-    def covidinfo_ny(self):
+    def covidinfo_ny(self) -> list:
         res = self.get_covid_info('盛鼎閣')
         return res
         
-    def covidinfo_ll(self):
+    def covidinfo_ll(self) -> list:
         res = self.get_covid_info('喜翠樓')
         return res
 
-    def covidinfo(self, arg):
+    def covidinfo(self, arg) -> list:
         res = self.get_covid_info(arg[0])
         return res
 
