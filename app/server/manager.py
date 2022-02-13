@@ -96,7 +96,8 @@ class TelegramBot(TelegramAPI):
                             func = getattr(self, text.replace('/', ''))
                             res = func()
                         for i in res:
-                            self.send_message(res, chat_id)
+                            self.send_message(i, chat_id)
+                            sleep(0.1)
                     except Exception as e:
                         self.send_message(e, chat_id)
             except Exception as e:
