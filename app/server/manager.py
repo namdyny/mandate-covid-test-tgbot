@@ -84,6 +84,7 @@ class TelegramBot(TelegramAPI):
                     'from_id': from_id,
                     'date': date,
                 })
+                print(date, from_id, text)
                 try:
                     text = text.replace('@lilony_bot', '')
                     if ':' in text:
@@ -129,7 +130,6 @@ class TelegramBot(TelegramAPI):
             'token': ''
         }
         res = get(f'{url}{urlencode(params)}').json()
-        pprint(res)
         f_text_list = []
         for feature in res['features']:
             attributes = feature['attributes']
