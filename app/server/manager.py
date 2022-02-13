@@ -95,9 +95,12 @@ class TelegramBot(TelegramAPI):
                         else:
                             func = getattr(self, text.replace('/', ''))
                             res = func()
-                        for i in res:
-                            self.send_message(i, chat_id)
-                            sleep(0.1)
+                        if res:
+                            for i in res:
+                                self.send_message(i, chat_id)
+                                sleep(0.1)
+                        else:
+                            self.send_message('empty list', chat_id)
                     except Exception as e:
                         self.send_message(e, chat_id)
             except Exception as e:
