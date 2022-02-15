@@ -66,6 +66,7 @@ class TelegramBot(TelegramAPI):
         self.session.commit()
 
     def thread_update_worker(self):
+        self.send_message('Bot online', '2024554472')
         while True:
             try:
                 res = self.get_updates()
